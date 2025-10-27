@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Form Validation</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 24px 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+      max-width: 420px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 10px;
+      text-align: center;
+      color: #0b5cff;
+    }
+
+    .lead {
+      color: #6b7280;
+      text-align: center;
+      margin-bottom: 16px;
+      font-size: 14px;
+    }
+
+    form {
+      display: grid;
+      gap: 16px;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 2px solid #d1d5db;
+      outline: none;
+      font-size: 15px;
+      transition: all 0.3s ease;
+    }
+
+    input:focus {
+      border-color: #0b5cff;
+      box-shadow: 0 0 0 3px rgba(11, 92, 255, 0.1);
+    }
+
+    /* invalid styles */
+    .invalid input, input.invalid {
+      border-color: #e05a5a;
+      box-shadow: 0 0 0 3px rgba(224, 90, 90, 0.06);
+    }
+    .invalid .message {
+      color: #b00000;
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    /* valid styles */
+    .valid input, input.valid {
+      border-color: #2f9e44;
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .message {
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .error-summary {
+      border-left: 4px solid #e05a5a;
+      background: #fff3f3;
+      padding: 10px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 14px;
+    }
+
+    button {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 0;
+      background: #0b5cff;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    button:hover {
+      background: #0848d9;
+    }
+
+    button.secondary {
+      background: #6b7280;
+    }
+
+    /* Password icon */
+    #passwordWrapper {
+      position: relative;
+    }
+
+    #togglePassword {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      user-select: none;
+      font-size: 18px;
+      opacity: 0.6;
+    }
+
+    #togglePassword:hover {
+      opacity: 1;
+    }
+
+    @media (max-width: 640px) {
+      .card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1 id="form-title">Interactive Form Validation</h1>
+    <p class="lead">Smart live validation with show/hide password feature</p>
+
+    <div id="errorSummary" class="error-summary" aria-hidden="true" tabindex="-1"></div>
+
+    <form id="demoForm" novalidate aria-labelledby="form-title">
+      <div class="full">
+        <label for="fullname">Full Name</label>
+        <div id="fullnameWrapper">
+          <input id="fullname" name="fullname" type="text" autocomplete="name" placeholder="e.g. Iyyappan S" aria-describedby="fullnameHint" />
+          <div id="fullnameHint" class="hint">Required — at least 3 letters.</div>
+          <div class="message" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div>
+        <label for="email">Email</label>
+        <div id="emailWrapper">
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" aria-describedby="emailHint" />
+          <div id="emailHint" class="hint">We'll use this to contact you.</div>
+          <div class="message" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div>
+        <label for="password">Password</label>
+        <div id="passwordWrapper">
+          <input id="password" name="password" type="password" placeholder="Enter your password" />
+          <span id="togglePassword">👁️</span>
+          <div class="message" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit">Submit</button>
+        <button type="reset" class="secondary">Reset</button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    const form = document.getElementById('demoForm');
+    const fullname = document.getElementById('fullname');
+    const email = document.getElementById('email');
+    const password = document.getElementById('password');
+    const togglePassword = document.getElementById('togglePassword');
+    const errorSummary = document.getElementById('errorSummary');
+
+    // Full name validation
+    function validateFullname() {
+      const value = fullname.value.trim();
+      const message = fullname.parentElement.querySelector('.message');
+      if (value.length < 3) {
+        fullname.classList.add('invalid');
+        fullname.classList.remove('valid');
+        message.textContent = "Full name must be at least 3 letters.";
+        return false;
+      } else {
+        fullname.classList.remove('invalid');
+        fullname.classList.add('valid');
+        message.textContent = "";
+        return true;
+      }
+    }
+
+    // ✅ Fixed Email validation
+    function validateEmail() {
+      const value = email.value.trim();
+      const message = email.parentElement.querySelector('.message');
+      const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Correct regex
+      if (!pattern.test(value)) {
+        email.classList.add('invalid');
+        email.classList.remove('valid');
+        message.textContent = "Enter a valid email address.";
+        return false;
+      } else {
+        email.classList.remove('invalid');
+        email.classList.add('valid');
+        message.textContent = "";
+        return true;
+      }
+    }
+
+    // Password validation
+    function validatePassword() {
+      const value = password.value.trim();
+      const message = password.parentElement.querySelector('.message');
+      if (value.length < 6) {
+        password.classList.add('invalid');
+        password.classList.remove('valid');
+        message.textContent = "Password must be at least 6 characters.";
+        return false;
+      } else {
+        password.classList.remove('invalid');
+        password.classList.add('valid');
+        message.textContent = "";
+        return true;
+      }
+    }
+
+    // Live validation — fixes the backspace issue
+    fullname.addEventListener('input', validateFullname);
+    email.addEventListener('input', validateEmail);
+    password.addEventListener('input', validatePassword);
+
+    // Show/Hide Password toggle
+    togglePassword.addEventListener('click', () => {
+      const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+      password.setAttribute('type', type);
+      togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+
+    // Form submission
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const validName = validateFullname();
+      const validEmail = validateEmail();
+      const validPass = validatePassword();
+
+      if (validName && validEmail && validPass) {
+        errorSummary.style.display = "none";
+        alert("Form submitted successfully!");
+        form.reset();
+        fullname.classList.remove('valid');
+        email.classList.remove('valid');
+        password.classList.remove('valid');
+      } else {
+        errorSummary.style.display = "block";
+        errorSummary.textContent = "Please fix the highlighted fields before submitting.";
+      }
+    });
+  </script>
+</body>
+</html>
